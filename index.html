@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pokemon Stadium</title>
+    <link href="https://fonts.googleapis.com/css?family=Play" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+    <script src="js/aframe.min.js"></script>
+    <script src="https://npmcdn.com/aframe-animation-component@3.0.1"></script>
+    <script src="https://npmcdn.com/aframe-event-set-component@3.0.1"></script>
+    <script src="https://npmcdn.com/aframe-layout-component@3.0.1"></script>
+    <script src="https://npmcdn.com/aframe-template-component@3.1.1"></script>
+    <script src="js/components.js"></script>
+</head>
+
+
+<body>
+
+<!-- Loading Spinner -->
+<div id="spinner-container">
+    <svg class="spinner" width="65px" height="65px" viewBox="0 0 66 66" xmlns="http://www.w3.org/2000/svg">
+        <circle class="path" fill="none" stroke-width="6" stroke-linecap="round" cx="33" cy="33" r="30"></circle>
+    </svg>
+</div>
+
+
+<!-- Sound Effects -->
+<audio id="battle-music" src="assets/sounds/battle-music.mp3"></audio>
+<audio id="ice-sound" src="assets/sounds/ice-beam.mp3"></audio>
+<audio id="click-sound" src="assets/sounds/click.mp3"></audio>
+<audio id="dash-sound" src="assets/sounds/dash.mp3"></audio>
+<audio id="crobat-cry" src="assets/sounds/crobat-cry.mp3"></audio>
+<audio id="lapras-cry" src="assets/sounds/lapras-cry.mp3"></audio>
+<audio id="victory-music" src="assets/sounds/victory-music.mp3"></audio>
+
+
+<!-- Splash Screen -->
+<div id="splash">
+    <div id="splash-mon-container">
+        <div id="splash-crobat"><img src="assets/img/splash-crobat.png"></div>
+        <div id="splash-lapras"><img src="assets/img/splash-lapras.png"></div>
+    </div>
+
+    <div id="splash-text-container">
+        <div id="splash-logo"><img src="assets/img/splash-logo.png"></div>
+        <div id="splash-message">Click anywhere to play!</div>
+    </div>
+</div>
+
+
+<!-- Scene -->
+<a-scene id="scene" scene-loaded="">
+
+    <!------------------------------------------------ Assets --------------------------------------------------------->
+    <a-assets>
+
+        <!-- Stadium -->
+        <a-asset-item id="bleachers-obj" src="assets/models/bleachers/bleachers.obj"></a-asset-item>
+        <a-asset-item id="bleachers-mtl" src="assets/models/bleachers/bleachers.mtl"></a-asset-item>
+
+        <!-- Stadium -->
+        <a-asset-item id="stadium-obj" src="assets/models/stadium/Pokemon+Stadium.obj"></a-asset-item>
+        <a-asset-item id="stadium-mtl" src="assets/models/stadium/Pokemon+Stadium.mtl"></a-asset-item>
+
+        <!-- Crobat -->
+        <a-asset-item id="cro-obj" src="assets/models/crobat/crobat.obj"></a-asset-item>
+        <a-asset-item id="cro-mtl" src="assets/models/crobat/crobat.mtl"></a-asset-item>
+
+        <!-- Lapras -->
+        <a-asset-item id="lap-obj" src="assets/models/lapras/lapras.obj"></a-asset-item>
+        <a-asset-item id="lap-mtl" src="assets/models/lapras/lapras.mtl"></a-asset-item>
+        <img id="lapras-thumb" src="assets/img/lapras-thumb.png">
+    </a-assets>
+
+
+    <!------------------------------------------------- Scene --------------------------------------------------------->
+
+    <!------------------------- Skybox -------------------------->
+    <a-sky id="sky" color="#279DF4"></a-sky>
+
+
+    <!------------------------ Abyss -------------------------->
+    <a-plane id="abyss" scale="1000 1000" position="0 -10 0" color="#212121" rotation="-90 0 0"
+             material="shader: flat"></a-plane>
+
+
+    <!------------------------ Camera + Cursor --------------------------->
+    <a-entity id="player" camera look-controls wasd-controls="acceleration: 200;" position="0 22.5 -2"
+              rotation="0 0 0">
+        <a-cursor id="cursor"
+                  animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+                  animation__fusing="property: fusing; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500"
+                  event-set__1="_event: mouseenter; color: springgreen"
+                  event-set__2="_event: mouseleave; color: black"
+                  fuse="true"
+                  raycaster="objects: .link">
+            <a-animation begin="click" easing="ease-in" attribute="scale"
+                         fill="backwards" from="0.1 0.1 0.1" to="1 1 1"></a-animation>
+        </a-cursor>
+    </a-entity>
+
+
+    <!------------------------ Menu --------------------------->
+    <!----------- Main ------------->
+    <a-plane id="menu-container" scale="16 8 1" position="0 21 -6.5" rotation="-60 0 0"  color="#000000" material="opacity: 0;">
+        <a-plane id="menu" scale="0.25 0.25 1" color="#F8F8F8" position="0 -0.35 0">
+            <!--- Main Menu --->
+            <a-plane id="main-menu" cursor-listener position="0 0 0.01" scale="1 1 1">
+                <a-plane class="link" id="menu-text-1" cursor-listener position="-0.25 0.25 0.01" scale="0.5 0.5 1"
+                         add-menu-arrow="" change-menu="battle-menu">
+                    <a-text value="FIGHT" color="#000000" position=" -0.25 0 0.1" scale="1 1 1"></a-text>
+                </a-plane>
+                <a-plane class="link" id="menu-text-2" cursor-listener position="0.25 0.25 0.01" scale="0.5 0.5 1"
+                         add-menu-arrow="" change-menu="pkmn-menu">
+                    <a-text value="P" color="#000000" position="-0.12 0.08 0.1" scale="0.5 0.5 1"></a-text>
+                    <a-text value="K" color="#000000" position="-0.04 0.00 0.1" scale="0.5 0.5 1"></a-text>
+                    <a-text value="M" color="#000000" position="0.04 0.08 0.1" scale="0.5 0.5 1"></a-text>
+                    <a-text value="N" color="#000000" position="0.12 0.00 0.1" scale="0.5 0.5 1"></a-text>
+                </a-plane>
+                <a-plane class="link" id="menu-text-3" cursor-listener position="-0.25 -0.25 0.01" scale="0.5 0.5 1"
+                         add-menu-arrow="">
+                    <a-text value="ITEM" color="#BDBDBD" position=" -0.25 0 0.1" scale="1 1 1"></a-text>
+                </a-plane>
+                <a-plane class="link" id="menu-text-4" cursor-listener position="0.25 -0.25 0.01" scale="0.5 0.5 1"
+                         add-menu-arrow="">
+                    <a-text value="RUN" color="#BDBDBD" position=" -0.25 0 0.1" scale="1 1 1"></a-text>
+                </a-plane>
+            </a-plane>
+        </a-plane>
+
+        <!----------- Back ------------->
+        <a-plane class="link" id="menu-back" scale="0.08 0.1 0.1" color="#F8F8F8" position="0.178 -0.428 0" rotation="0 0 0"
+                 add-menu-arrow="" change-menu="back">
+            <a-text value="BACK" color="#000000" position="-0.3 0 0.1" scale="1 1 1"></a-text>
+        </a-plane>
+
+        <!----------- Enemy Health Bar ------------->
+        <a-plane id="enemy-health" scale="0.25 0.15 1" color="#F8F8F8" position="-0.23 -0.114 -0.197" color="#F8F8F8">
+            <a-text id="enemy-name" value="CROBAT" color="#000000" position=" -0.4 0.2 0.1" scale="0.5 1 0.1"></a-text>
+            <a-plane id="enemy-health-bar" scale="0.8 0.2 0.1" color="#000000" position="0 0 0.01">
+                <a-plane id="enemy-health-percent" color="#13A924" scale="1 1 1" position="0 0 0.1"></a-plane>
+            </a-plane>
+        </a-plane>
+
+        <!----------- Your Health Bar ------------->
+        <a-plane id="your-health" scale="0.25 0.15 1" color="#F8F8F8" position="0.23 -0.114 -0.197" color="#F8F8F8">
+            <a-text id="your-name" value="LAPRAS" color="#000000" position="-0.422 0.2 0.1" scale="0.5 1 0.1"></a-text>
+            <a-plane id="your-health-bar" scale="0.8 0.2 0.1" color="#000000" position="0 0 0.01">
+                <a-plane id="your-health-percent" color="#13A924" scale="1 1 1" position="0 0 0.01"></a-plane>
+            </a-plane>
+        </a-plane>
+    </a-plane>
+
+
+    <!------------------------- Stadium -------------------------->
+    <a-entity id="stadium" obj-model="obj: #stadium-obj; mtl: #stadium-mtl" position="-31.14 0 10"
+              scale="0.05 0.05 0.05" rotation="0 90 0">
+    </a-entity>
+
+
+    <!------------------------- Crobat -------------------------->
+    <a-entity id="crobat" class="pokemon" obj-model="obj: #cro-obj; mtl: #cro-mtl" position="0 12 -36" scale="0.01 0.01 0.01"
+              rotation="-0.8 0 0" data-maxHealth="200" data-currentHealth="200" data-type1="poison" data-type2="flying">
+
+        <!-- Idle animation -->
+        <a-animation attribute="position"
+                     direction="alternate"
+                     dur="600"
+                     to="0 11 -36"
+                     repeat="indefinite"
+                     easing="ease">
+        </a-animation>
+        <a-animation attribute="rotation"
+                     direction="alternate"
+                     dur="600"
+                     to="20 0 0"
+                     repeat="indefinite"
+                     easing="ease">
+        </a-animation>
+    </a-entity>
+
+
+    <!-------------------------- Lapras ------------------------->
+    <a-entity id="lapras" class="pokemon"
+              obj-model="obj: #lap-obj; mtl: #lap-mtl"
+              position="0 10.4 -17"
+              scale="0.15 0.15 0.15"
+              rotation="0 180 -0.8"
+              data-maxhealth="400"
+              data-currenthealth="400"
+              data-type1="water" data-type2="ice">
+
+        <!-- Idle animation -->
+        <a-animation attribute="position"
+                     direction="alternate"
+                     dur="1000"
+                     to="0 10.6 -17.2"
+                     repeat="indefinite"
+                     easing="ease">
+        </a-animation>
+        <a-animation attribute="rotation"
+                     direction="alternate"
+                     dur="1000"
+                     to="-3 180 0"
+                     repeat="indefinite"
+                     easing="ease">
+        </a-animation>
+    </a-entity>
+</a-scene>
+
+<script src="js/main.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+
+
+
+
+
